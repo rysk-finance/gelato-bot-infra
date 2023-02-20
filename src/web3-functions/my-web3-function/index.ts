@@ -108,17 +108,16 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 	await storage.set("mainnetActiveVaultIds", JSON.stringify(activeVaultIds))
 	console.log({ activeVaultIds })
 
-  // the below code needs to be replaced with a function call to a multi-call contract
-  // the multi-call contract function will take a bool and array of vaultIDs
-  // 
-  
+
   let vaultsToAdjust: Number[] = []
-	// iterate over vaults and check health. adjust if needed
+	// multicall function will iterate over all IDs and check their health
 	if (activeVaultIds.length) {
+    // returns vaultID if vault needs adjusting, 0 if it does not.
+    // filter elements that equal 0 out
     vaultsToAdjust = (await multicall.checkVaults(activeVaultIds)).map(id => id.toNumber()).filter(id => id != 0)
 	}
   console.log(vaultsToAdjust)
-  // if true, this will signal to the gelato executor to call a function on a multicall contract
+  // if true, this will signal to the gelato executor to call the adjust function on the multicall contract
   // the multicall contract will loop through the array calling optionRegistry.adjustCollateral on each vault ID in the callData payload.
   if (vaultsToAdjust.length){
     // Return execution call data
