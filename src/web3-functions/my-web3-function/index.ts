@@ -2,7 +2,7 @@ import {
   Web3Function,
   Web3FunctionContext,
 } from "@gelatonetwork/web3-functions-sdk";
-import { Contract, ethers , Event} from "ethers";
+import { Contract , Event} from "ethers";
 
 import controllerAbi from "../../abi/NewController.json"
 import optionRegistryAbi from "../../abi/OptionRegistry.json"
@@ -26,17 +26,15 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 	let activeVaultIds
 	// the vaultCount for the option registry on the last function call
 	let previousVaultCount
-	// multiple of upperHeathFactor above which extra collateral is removed
-	const upperhealthFactorBuffer = 1.1
 
   try {
 		// get persistant variables from store
 		lastQueryBlock = parseInt(
-			await storage.get("lastBlockNumber") ?? "0"
+			await storage.get("lastQueryBlock") ?? "0"
 		)
 
 		activeVaultIds = JSON.parse(await storage.get("activeVaultIds") ?? "[]")
-		previousVaultCount = parseInt(await storage.get("mainnetPreviousVaultCount") ?? "0")
+		previousVaultCount = parseInt(await storage.get("previousVaultCount") ?? "0")
 		console.log({ lastQueryBlock, activeVaultIds, previousVaultCount })
 	} catch (err) {
 		console.log("error retrieving data from store")
@@ -71,7 +69,7 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 
   // set last query block to current block value
 	await storage.set(
-		"mainnetCollateralThresholdLastQueryBlock",
+		"lastQueryBlock",
 		currentBlock.toString()
 	)
 	// return vault IDs of settled vault events where the vault owner is the option registry
@@ -99,13 +97,13 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 	)
 	console.log({ additionalVaultIds })
 	// update previousVaultCount in storage
-	await storage.set("mainnetPreviousVaultCount", vaultCount.toString())
+	await storage.set("previousVaultCount", vaultCount.toString())
 	// add newly created vault IDs to existing array of active vault IDs
 	activeVaultIds.push(...additionalVaultIds)
 	// remove activeVaultIds which appear in settledEventIds
 	activeVaultIds = activeVaultIds.filter(id => !settledEventIds.includes(id))
 	// update activeVaultIDs in storage
-	await storage.set("mainnetActiveVaultIds", JSON.stringify(activeVaultIds))
+	await storage.set("activeVaultIds", JSON.stringify(activeVaultIds))
 	console.log({ activeVaultIds })
 
 
