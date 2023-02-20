@@ -51,51 +51,20 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
   const controller = await new Contract(controllerAddress, controllerAbi, provider)
 
 	const currentBlock = await provider.getBlockNumber()
-  console.log({currentBlock, lqb: lastQueryBlock + 100000})
 	// will contain emitted SettledVault events since the previous function execution
 	let settleEvents: Event[] = []
 	let liquidationEvents: Event[] = []
-	// 10000 block range is max limit for queries for some providers
-	// if this is true something has probably gone wrong
-	if (currentBlock > lastQueryBlock + 10000000) {
-    for (let i = lastQueryBlock; i <= currentBlock; i = i + 10000000) {
-      console.log("1")
-			// iterate over 10000 batches of blocks to catch up to currentBlock
-			// find instances of settled vaults since the last query
-			const settleEventsBatch = await controller.queryFilter(
-				controller.filters.VaultSettled(),
-				i,
-				i + 9999999
-			)
-      console.log("2")
-			// find instances of liquidated vaults since the last query
-			const liquidationEventsBatch = await controller.queryFilter(
-        controller.filters.VaultLiquidated(),
-				i,
-				i + 9999999
-      )
-      if (settleEventsBatch.length) {
-        settleEvents.push(settleEventsBatch)
-      }
-      if (liquidationEventsBatch.length) {
-        liquidationEvents.push(liquidationEventsBatch)
-			}
-		}
-	} else {
-    settleEvents = await controller.queryFilter(
-      controller.filters.VaultSettled(),
-			lastQueryBlock
-      )
-    liquidationEvents = await controller.queryFilter(
-      controller.filters.VaultLiquidated(),
-      lastQueryBlock
-      )
-  }
-  settleEvents = settleEvents.flat()
-  liquidationEvents = liquidationEvents.flat()
-  console.log(settleEvents[0])
-  console.log({ settleEvents: settleEvents.map(n => n.args?.vaultId), liquidationEvents })
-  console.log({ settleEvents: settleEvents.length, liquidationEvents: liquidationEvents.length })
+	
+  settleEvents = await controller.queryFilter(
+    controller.filters.VaultSettled(),
+    lastQueryBlock
+  )
+  liquidationEvents = await controller.queryFilter(
+    controller.filters.VaultLiquidated(),
+    lastQueryBlock
+  )
+  settleEvents = settleEvents
+  liquidationEvents = liquidationEvents
 
   // set last query block to current block value
 	await storage.set(
