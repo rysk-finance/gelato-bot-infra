@@ -6,6 +6,7 @@ import { Contract, ethers , Event} from "ethers";
 
 import controllerAbi from "../../abi/NewController.json"
 import optionRegistryAbi from "../../abi/OptionRegistry.json"
+import vaultCollateralMulticallAbi from "../../abi/VaultCollateralMulticall.json"
 
 // block that the option regsitry was deployed on
 const optionRegistryDeployBlock = 25976032
@@ -17,6 +18,7 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
   
   const optionRegistryAddress = "0x04706DE6cE851a284b569EBaE2e258225D952368"
 	const controllerAddress = "0x594bD4eC29F7900AE29549c140Ac53b5240d4019"
+  const multicallAddress = "0xa304d4418E6f4dFCEc90A73E478FDB950Fd70385"
 
   // the block number on which this function was last called
 	let lastQueryBlock
@@ -49,6 +51,7 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 
   const optionRegistry = await new Contract(optionRegistryAddress, optionRegistryAbi, provider)
   const controller = await new Contract(controllerAddress, controllerAbi, provider)
+  const multicall = await new Contract(multicallAddress,vaultCollateralMulticallAbi, provider )
 
 	const currentBlock = await provider.getBlockNumber()
 	// will contain emitted SettledVault events since the previous function execution
@@ -109,40 +112,10 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
   // the multi-call contract function will take a bool and array of vaultIDs
   // 
   
-  const vaultsToAdjust: Number[] = []
+  let vaultsToAdjust: Number[] = []
 	// iterate over vaults and check health. adjust if needed
 	if (activeVaultIds.length) {
-		for (let i = 0; i <= activeVaultIds.length - 1; i++) {
-			try {
-				const [
-					isBelowMin,
-					isAboveMax,
-					healthFactor,
-					upperHealthFactor,
-					collatRequired,
-					collatAsset
-				] = await optionRegistry.checkVaultHealth(activeVaultIds[i])
-
-				console.log({
-					arrayId: activeVaultIds[i],
-					isBelowMin,
-					isAboveMax,
-					healthFactor: healthFactor.toNumber(),
-					upperHealthFactor: upperHealthFactor.toNumber(),
-					collatRequired: parseInt(collatRequired, 16),
-					collatAsset
-				})
-				if (
-					isBelowMin ||
-					(isAboveMax &&
-						healthFactor > upperhealthFactorBuffer * upperHealthFactor)
-				) {
-            vaultsToAdjust.push(i)
-        }
-			} catch (err) {
-				console.error("error!:", err)
-			}
-		}
+    vaultsToAdjust = (await multicall.checkVaults(activeVaultIds)).map(id => id.toNumber()).filter(id => id != 0)
 	}
   console.log(vaultsToAdjust)
   // if true, this will signal to the gelato executor to call a function on a multicall contract

@@ -1,0 +1,81 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_executorAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_optionRegistry",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "invalidMsgSender",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "vaultIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "adjustVaults",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "vaultIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "checkVaults",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "executorAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "optionRegistry",
+    "outputs": [
+      {
+        "internalType": "contract OptionRegistry",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
