@@ -49,14 +49,40 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 	// will contain emitted SettledVault events since the previous function execution
 	let settleEvents: Event[] = []
 	let liquidationEvents: Event[] = []
-
-	settleEvents = await controller.queryFilter(controller.filters.VaultSettled(), lastQueryBlock)
-	liquidationEvents = await controller.queryFilter(
-		controller.filters.VaultLiquidated(),
-		lastQueryBlock
-	)
-	settleEvents = settleEvents
-	liquidationEvents = liquidationEvents
+	// 10000000 block range is max limit for queries for some providers
+	// if this is true something has probably gone wrong or it is the first run
+	if (currentBlock > lastQueryBlock + 10000000) {
+		for (let i = lastQueryBlock; i <= currentBlock; i = i + 10000000) {
+			// iterate over 10000000 batches of blocks to catch up to currentBlock
+			// find instances of settled vaults since the last query
+			const settleEventsBatch = await controller.queryFilter(
+				controller.filters.VaultSettled(),
+				i,
+				i + 9999999
+			)
+			// find instances of liquidated vaults since the last query
+			const liquidationEventsBatch = await controller.queryFilter(
+				controller.filters.VaultLiquidated(),
+				i,
+				i + 9999999
+			)
+			if (settleEventsBatch.length) {
+				settleEvents.push(settleEventsBatch)
+			}
+			if (liquidationEventsBatch.length) {
+				liquidationEvents.push(liquidationEventsBatch)
+			}
+		}
+	} else {
+		settleEvents = await controller.queryFilter(controller.filters.VaultSettled(), lastQueryBlock)
+		liquidationEvents = await controller.queryFilter(
+			controller.filters.VaultLiquidated(),
+			lastQueryBlock
+		)
+	}
+	settleEvents = settleEvents.flat()
+	liquidationEvents = liquidationEvents.flat()
+	console.log({ settleEvents, liquidationEvents })
 
 	// return vault IDs of settled vault events where the vault owner is the option registry
 	let settledEventIds: Number[] = []
