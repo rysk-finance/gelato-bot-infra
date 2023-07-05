@@ -12,9 +12,9 @@ const optionRegistryDeployBlock = 25976032
 Web3Function.onRun(async (context: Web3FunctionContext) => {
 	const { storage, provider } = context
 
-	const optionRegistryAddress = "0x04706DE6cE851a284b569EBaE2e258225D952368"
+	const optionRegistryAddress = "0x8Bc23878981a207860bA4B185fD065f4fd3c7725"
 	const controllerAddress = "0x594bD4eC29F7900AE29549c140Ac53b5240d4019"
-	const multicallAddress = "0xC6b51303B65156bB1C35d188570eb671B7b0Bc50"
+	const multicallAddress = "0x622a3275d05F31F2f3AeDc439DE1e7913FB9fD59"
 
 	// the block number on which this function was last called
 	let lastQueryBlock
