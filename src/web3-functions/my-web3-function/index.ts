@@ -6,7 +6,7 @@ import optionRegistryAbi from "../../abi/OptionRegistry.json"
 import vaultCollateralMulticallAbi from "../../abi/VaultCollateralMulticall.json"
 
 // block that the option regsitry was deployed on
-const optionRegistryDeployBlock = 25976032
+const optionRegistryDeployBlock = 105497603
 
 // Fill this out with your Web3 Function logic
 Web3Function.onRun(async (context: Web3FunctionContext) => {
