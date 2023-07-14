@@ -34,8 +34,9 @@ Web3Function.onRun(async (context: Web3FunctionContext) => {
 		console.log("error retrieving data from store")
 		console.log(err)
 	}
-	// if these are undefined, it must be the first function call or the data is corrupted so build from scratch
-	if (!activeVaultIds || !lastQueryBlock || !previousVaultCount) {
+	// if these are default values, it must be the first function call or the data is corrupted so build from scratch
+	if (activeVaultIds == "[]" || lastQueryBlock == "0" || previousVaultCount == "0") {
+		console.log("reset data")
 		activeVaultIds = []
 		lastQueryBlock = optionRegistryDeployBlock
 		previousVaultCount = 0
